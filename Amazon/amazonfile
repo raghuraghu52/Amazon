@@ -1,0 +1,39 @@
+pipeline{
+    agent any 
+    
+    stages {
+        
+        stage('clone') {
+            steps{
+            git 'https://github.com/raghuraghu52/Amazon.git'
+        }
+        }
+          stage(build) {
+            steps {
+                sh 'mvn -f /var/lib/jenkins/workspace/amazonpipeline/Amazon/pom.xml -DskipTests clean install'
+			}
+		}
+		stage(test) {
+			steps {
+			   sh "pwd"
+			    dir("Amazon"){
+			        sh "pwd"
+			        sh "mvn test"
+			    }
+			}
+			post {
+				always {
+					junit '**/target/surefire-reports/*.xml'
+				}
+		
+	    	}
+		}
+        stage('deploy') {
+			steps {
+			           sh 'cp Amazon/Amazon-Web/target/*.war /var/opt/tomcat/webapps'
+
+			}
+        }
+    }
+    
+}
